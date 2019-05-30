@@ -98,4 +98,4 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 [Neural Machine Translation]: https://www.aclweb.org/anthology/D16-1112
 [Github:pointer-generator]:https://github.com/becxer/pointer-generator/
 [Pointing the Unknown Words]:https://www.aclweb.org/anthology/P16-1014
-[fig2]: /Pointer-Gen-Figure2.png
+[fig2]: /figure/Pointer-Gen-Figure2.png
