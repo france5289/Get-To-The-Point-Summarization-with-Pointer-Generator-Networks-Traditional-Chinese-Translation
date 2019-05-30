@@ -2,7 +2,7 @@
 
 ## **Document Outline**
 
-本文將根據以下的段落，給予其各自的段落摘要。
+本文將根據以下的段落，給予其各自的段落翻譯。
 
 1. Abstract
 2. Introduction
