@@ -4,7 +4,7 @@
 
 ## How to read?
 
-開啟 **Pointer Generator Networks論文大綱 .md**檔案即可，該檔案以markdown語法搭配LaTex語法寫成，而檔案引用的圖片皆來自原始論文的截圖，若有侵權行為將撤除圖片檔案。
+開啟 **Pointer Generator Networks論文大綱 .md**檔案即可，該檔案以markdown語法寫成再搭配LaTex(因為github markdown 不支援LaTex,因此改用圖片嵌入)顯示數學公式，而檔案引用的圖片皆來自原始論文的截圖，若有侵權行為將撤除圖片檔案。
 
 ## Issue report
 
