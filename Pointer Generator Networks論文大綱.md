@@ -85,39 +85,25 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 > **Figure2** : Baseline sequence-to-sequence model with attention.  
 > The model may attend to relevant words in the source text to generate novel words, e.g.,to produce the novel word _**beat**_ in the abstractive summary _Germany **beat** Argentina 2-0_ the model may attend to the words _victorious_ and _win_ in the source text.  
 
-文章的token $w_i$ 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states $h_i$。在每一步驟 $t$，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state $s_t$。而 _attention distribution_ $a_t$則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:  
-$$
-e^t_i = v^T tanh(W_h h_i + W_s s_t + b_{attn})
-$$
-$$
-a^t = softmax(e^t)
-$$
-其中 $v, W_h, W_s$以及$b_{attn}$均為可學習的參數。attention distribution可被視為來源單字(source words)的機率分布，它告訴decoder要檢視來源單字的哪個部份來產生下一個字詞。接著attention distribution將被用來產生encoder hidden states的權重和，稱作 _context vector_ $h^*_t$:  
-$$
-h^*_t = \Sigma_i a^t_i h_i
-$$
+文章的token ![w_i][w_i] 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states ![h_i][h_i]。在每一步驟 ![t][t]，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state ![s_t][s_t]。而 _attention distribution_ ![a_t][a_t]則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:  
+![equa1][equa1]  
+![equa2][equa2]  
+其中 ![vwhws][vwhws]以及![b_attn][b_attn]均為可學習的參數。attention distribution可被視為來源單字(source words)的機率分布，它告訴decoder要檢視來源單字的哪個部份來產生下一個字詞。接著attention distribution將被用來產生encoder hidden states的權重和，稱作 _context vector_ ![h^*_t][h^*_t]:  
+![equa3][equa3]  
 其中context vector可被視為在這個步驟時，所讀取自來源文字的固定大小表示法(_這裡翻得不好_)
 
 ### _原文對照如下_
 
 > this context vector, which can be seen as a fixed-size representation of what has been read from the source for this step
 
-而context vector將與decoder state $s_t$串接，並且通過兩個線性層去產生vocabulary distribution $P_{vocab}$ :
-$$
-P_{vocab} = softmax(V'(V[s_t,h^*_t]+b)+b')
-$$
-其中 V, V', b 以及 b'都是可學習的參數。$P_{vocab}$ 是所有詞彙庫中的單詞之機率分布，並且能夠提供我們要預測的單字$w$的最終機率分布:
-$$
-P(w) = P_{vocab}(w)
-$$
-在訓練時，時間 $t$ 下的loss值被定義為對目標單字 $w^*_t$ 的負log likelihood
-$$
-loss_t = -\log P(w^*_t)
-$$
-而總體語句序列的loss值則為:
-$$
-loss = \frac{1}{T} \Sigma^T_{t=0} loss_t
-$$
+而context vector將與decoder state ![s_t][s_t]串接，並且通過兩個線性層去產生vocabulary distribution ![P_vocab][P_vocab] :  
+![equa4][equa4]  
+其中 V, V', b 以及 b'都是可學習的參數。![P_vocab][P_vocab] 是所有詞彙庫中的單詞之機率分布，並且能夠提供我們要預測的單字 w 的最終機率分布:  
+![equa5][equa5]  
+在訓練時，時間 ![t][t] 下的loss值被定義為對目標單字 ![w^*_t][w^*_t] 的負log likelihood  
+![equa6][equa6]  
+而總體語句序列的loss值則為:  
+![equa7][equa7]  
 
 ## **9. Conclusion**
 
@@ -132,3 +118,20 @@ $$
 [Pointing the Unknown Words]:https://www.aclweb.org/anthology/P16-1014
 [fig2]: /figure/Pointer-Gen-Figure2.png
 [Bahdanau 2015]: https://arxiv.org/pdf/1409.0473.pdf
+[w_i]: /figure/w_i.jpg
+[h_i]: /figure/h_i.jpg
+[t]: /figure/t.jpg
+[s_t]:/figure/s_t.jpg
+[a_t]: /figure/a_t.jpg
+[equa1]:/figure/equa1.jpg
+[equa2]:/figure/equa2.jpg
+[vwhws]:/figure/vw_hw_s.jpg
+[b_attn]:/figure/b_attn.jpg
+[h^*_t]:/figure/h_t.jpg
+[equa3]:/figure/equa3.jpg
+[P_vocab]: /figure/p_vocab.jpg
+[equa4]:/figure/equa4.jpg
+[equa5]:/figure/equa5.jpg
+[w^*_t]:/figure/w_star_t.jpg
+[equa6]:/figure/equa6.jpg
+[equa7]:/figure/equa7.jpg
