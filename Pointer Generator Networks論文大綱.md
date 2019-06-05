@@ -85,7 +85,7 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 > **Figure2** : Baseline sequence-to-sequence model with attention.  
 > The model may attend to relevant words in the source text to generate novel words, e.g.,to produce the novel word _**beat**_ in the abstractive summary _Germany **beat** Argentina 2-0_ the model may attend to the words _victorious_ and _win_ in the source text.  
 
-文章的token ![w_i][w_i] 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states ![h_i][h_i]。在每一步驟 ![t][t]，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state ![s_t][s_t]。而 _attention distribution_ ![a_t][a_t]則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:  
+文章的token ![w_i][w_i] 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states ![h_i][h_i]。在每一步驟 ![t][t]，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state ![s_t][s_t]。而 _attention distribution_ ![a^t][a^t]則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:  
 ![equa1][equa1]  
 ![equa2][equa2]  
 其中 ![vwhws][vwhws]以及![b_attn][b_attn]均為可學習的參數。attention distribution可被視為來源單字(source words)的機率分布，它告訴decoder要檢視來源單字的哪個部份來產生下一個字詞。接著attention distribution將被用來產生encoder hidden states的權重和，稱作 _context vector_ ![h^*_t][h^*_t]:  
@@ -107,16 +107,28 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 
 ### **3.2 Pointer-generator network**
 
+我們的pointer-generator network是屬於baseline model與pointer network[(Vinyals et al.,2015)][pointer-network]的複合模型，它同時允許透過pointing複製詞彙且能透過固定的詞彙表產生詞彙。  
+![Pointer-generator model][fig3]
+
+>**Figure3** : Pointer-generator model. For each decoder timestep a generation probability ![p_gen][p_gen_equa] is calculated, which weights the probability of generating words from the vocabulary, versus copying words from the source text. The vocabulary distribution and the attention distribution are weighted and summed to obtain the final distribution, from which we make our prediction.  Note that out-of-vocabulary article words such as 2-0 are included in the final distribution. Best viewed in color.
+
+在pointer-generator model(描述於圖三)中，attention distribution ![a^t][a^t] 與context vector ![h^*_t][h^*_t]的計算公式同於 3.1 節。此外，時間![t][t]下的 _generation probability_ ![p_gen][p_gen_equa] 是透過context vector ![h^*_t][h^*_t] , decoder state ![s_t][s_t] 以及decoder input ![x_t][x_t] 計算而得，其公式如下:  
+![equa8][equa8]  
+其中向量 ![w_{h^*}][w_{h^*}] , ![w_s][w_s] , ![w_x][w_x] 以及純量 ![b_ptr][b_ptr] 均為可學習的參數且 ![sigma][sigma] 為sigmoid fuction。  
+接著, ![p_gen][p_gen] 將被當作一個軟開關來選擇要透過對![P_vocab][P_vocab] 進行採樣藉此從詞彙庫 _產生_ 一個詞彙還是藉由對attention distribution ![a^t][a^t] 進行採樣藉此從輸入序列 _複製_ 一個詞彙。對每個文件我們用 _extended vocabulary_ 表示詞彙庫的聯集以及所有來源文件中所出現的詞彙。我們可得到對於extended vocabulary的機率分布:  
+![equa9][equa9]  
+注意，如果 w 是一個不存在於詞彙庫中的詞彙(out-of-vocabulary, OOV)，則![P_vocab w][P_vocab_w] 值為零；同樣的如果 w 不存在於來源文件中，那麼 ![Sigma_a_t][Sigma_a_t]的值亦為零。 產生 OOV 詞彙的能力是pointer-generator model中其中一個主要優勢；相較之下，其他模型例如我們的baseline model就會受制於其預先設定的詞彙庫。  
+而pointer-generator model的loss function公式與先前baseline model的公式相同，只是將機率分布 P(W) 的算法修改成本節所提及的公式。
+
+### **3.3 Coverage mechanism**
 
 
 ## **9. Conclusion**
 
 在本論文中，我們提出一個pointer-generator的混和架構並搭配coverage技巧，展示了如何減少summarization的錯誤率以及降低重覆語句的問題。我們使用一個全新且富有挑戰性的長文本(_long-text_)資料，且模型的表現顯著的優於其他abstractive model。我們的模型展示了許多抽象的特性，雖然達到高水準的抽象化但我們仍然保留公開討論與研究的空間。
 
-
-
-[CopyNet]: https://arxiv.org/pdf/1603.06393.pdf 
-[Forced-Attention Sentence Compression]: https://arxiv.org/pdf/1609.07317.pdf 
+[CopyNet]: https://arxiv.org/pdf/1603.06393.pdf
+[Forced-Attention Sentence Compression]: https://arxiv.org/pdf/1609.07317.pdf
 [Neural Machine Translation]: https://www.aclweb.org/anthology/D16-1112
 [Github:pointer-generator]:https://github.com/becxer/pointer-generator/
 [Pointing the Unknown Words]:https://www.aclweb.org/anthology/P16-1014
@@ -126,7 +138,7 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 [h_i]: /figure/h_i.jpg
 [t]: /figure/t.jpg
 [s_t]:/figure/s_t.jpg
-[a_t]: /figure/a_t.jpg
+[a^t]: /figure/a^t.jpg
 [equa1]:/figure/equa1.jpg
 [equa2]:/figure/equa2.jpg
 [vwhws]:/figure/vw_hw_s.jpg
@@ -139,3 +151,17 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 [w^*_t]:/figure/w_star_t.jpg
 [equa6]:/figure/equa6.jpg
 [equa7]:/figure/equa7.jpg
+[pointer-network]:https://arxiv.org/pdf/1506.03134.pdf
+[fig3]:/figure/fig3.png
+[p_gen_equa]:/figure/p_gen_equa.jpg
+[x_t]:/figure/x_t.jpg
+[equa8]:/figure/equa8.jpg
+[w_{h^*}]:/figure/w_h_star.jpg
+[w_s]:/figure/w_s.jpg
+[w_x]:/figure/w_x.jpg
+[b_ptr]:/figure/b_ptr.jpg
+[sigma]:/figure/sigma.jpg
+[p_gen]:/figure/p_gen.jpg
+[equa9]:/figure/equa9.jpg
+[P_vocab_w]:/figure/P_vocab_w.jpg
+[Sigma_a_t]:/figure/Sigma_a_t.jpg
