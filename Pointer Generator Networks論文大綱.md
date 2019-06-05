@@ -85,11 +85,7 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 > **Figure2** : Baseline sequence-to-sequence model with attention.  
 > The model may attend to relevant words in the source text to generate novel words, e.g.,to produce the novel word _**beat**_ in the abstractive summary _Germany **beat** Argentina 2-0_ the model may attend to the words _victorious_ and _win_ in the source text.  
 
-文章的token ![w_i][w_i] 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states ![h_i][h_i]。在每一步驟 ![t][t]，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state ![s_t][s_t]。而 _attention distribution_ ![a_t][a_t]則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:
-
-<div style="text-align:center"><img src="figure/equa1.jpg"/></div>
-
-
+文章的token ![w_i][w_i] 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states ![h_i][h_i]。在每一步驟 ![t][t]，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state ![s_t][s_t]。而 _attention distribution_ ![a_t][a_t]則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:  
 ![equa1][equa1]  
 ![equa2][equa2]  
 其中 ![vwhws][vwhws]以及![b_attn][b_attn]均為可學習的參數。attention distribution可被視為來源單字(source words)的機率分布，它告訴decoder要檢視來源單字的哪個部份來產生下一個字詞。接著attention distribution將被用來產生encoder hidden states的權重和，稱作 _context vector_ ![h^*_t][h^*_t]:  
