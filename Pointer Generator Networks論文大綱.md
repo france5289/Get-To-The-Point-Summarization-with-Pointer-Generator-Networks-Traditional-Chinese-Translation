@@ -86,10 +86,15 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 > The model may attend to relevant words in the source text to generate novel words, e.g.,to produce the novel word _**beat**_ in the abstractive summary _Germany **beat** Argentina 2-0_ the model may attend to the words _victorious_ and _win_ in the source text.  
 
 文章的token ![w_i][w_i] 將被逐一的餵入encoder(一個單層雙向的LSTM)，並產生一序列的 encoder hidden states ![h_i][h_i]。在每一步驟 ![t][t]，decoder(一個單層無向的LSTM)將接受前一個字的word embedding(若是在訓練時期，則前一個字即為參考摘要中的前一個字。而在測試時期，則是decoder產生的前一個字)，並產生 decorder state ![s_t][s_t]。而 _attention distribution_ ![a^t][a^t]則根據[Bahdanau et al.(2015)][Bahdanau 2015]的論文中所提供的公式:  
-![equa1][equa1]  
-![equa2][equa2]  
+  
+![equa1][equa1](1)  
+  
+![equa2][equa2](2)  
+  
 其中 ![vwhws][vwhws]以及![b_attn][b_attn]均為可學習的參數。attention distribution可被視為來源單字(source words)的機率分布，它告訴decoder要檢視來源單字的哪個部份來產生下一個字詞。接著attention distribution將被用來產生encoder hidden states的權重和，稱作 _context vector_ ![h^*_t][h^*_t]:  
-![equa3][equa3]  
+  
+![equa3][equa3](3)  
+  
 其中context vector可被視為在這個步驟時，所讀取自來源文字的固定大小表示法(_這裡翻得不好_)
 
 #### _原文對照如下_
@@ -97,14 +102,21 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 > this context vector, which can be seen as a fixed-size representation of what has been read from the source for this step
 
 而context vector將與decoder state ![s_t][s_t]串接，並且通過兩個線性層去產生vocabulary distribution ![P_vocab][P_vocab] :  
-![equa4][equa4]  
+  
+![equa4][equa4](4)  
+  
 其中 V, V', b 以及 b'都是可學習的參數。![P_vocab][P_vocab] 是所有詞彙庫中的單詞之機率分布，並且能夠提供我們要預測的單字 w 的最終機率分布:  
-![equa5][equa5]  
+  
+![equa5][equa5](5)  
+  
 在訓練時，時間 ![t][t] 下的loss值被定義為對目標單字 ![w^*_t][w^*_t] 的負log likelihood  
-![equa6][equa6]  
+  
+![equa6][equa6](6)  
+  
 而總體語句序列的loss值則為:  
-![equa7][equa7]  
-
+  
+![equa7][equa7](7)  
+  
 ### **3.2 Pointer-generator network**
 
 我們的pointer-generator network是屬於baseline model與pointer network[(Vinyals et al.,2015)][pointer-network]的複合模型，它同時允許透過pointing複製詞彙且能透過固定的詞彙表產生詞彙。  
@@ -113,14 +125,19 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 >**Figure3** : Pointer-generator model. For each decoder timestep a generation probability ![p_gen][p_gen_equa] is calculated, which weights the probability of generating words from the vocabulary, versus copying words from the source text. The vocabulary distribution and the attention distribution are weighted and summed to obtain the final distribution, from which we make our prediction.  Note that out-of-vocabulary article words such as 2-0 are included in the final distribution. Best viewed in color.
 
 在pointer-generator model(描述於圖三)中，attention distribution ![a^t][a^t] 與context vector ![h^*_t][h^*_t]的計算公式同於 3.1 節。此外，時間![t][t]下的 _generation probability_ ![p_gen][p_gen_equa] 是透過context vector ![h^*_t][h^*_t] , decoder state ![s_t][s_t] 以及decoder input ![x_t][x_t] 計算而得，其公式如下:  
-![equa8][equa8]  
+
+![equa8][equa8](8)  
+  
 其中向量 ![w_{h^*}][w_{h^*}] , ![w_s][w_s] , ![w_x][w_x] 以及純量 ![b_ptr][b_ptr] 均為可學習的參數且 ![sigma][sigma] 為sigmoid fuction。  
 接著, ![p_gen][p_gen] 將被當作一個軟開關來選擇要透過對![P_vocab][P_vocab] 進行採樣藉此從詞彙庫 _產生_ 一個詞彙還是藉由對attention distribution ![a^t][a^t] 進行採樣藉此從輸入序列 _複製_ 一個詞彙。對每個文件我們用 _extended vocabulary_ 表示詞彙庫的聯集以及所有來源文件中所出現的詞彙。我們可得到對於extended vocabulary的機率分布:  
-![equa9][equa9]  
+
+![equa9][equa9](9)  
+  
 注意，如果 w 是一個不存在於詞彙庫中的詞彙(out-of-vocabulary, OOV)，則![P_vocab w][P_vocab_w] 值為零；同樣的如果 w 不存在於來源文件中，那麼 ![Sigma_a_t][Sigma_a_t]的值亦為零。 產生 OOV 詞彙的能力是pointer-generator model中其中一個主要優勢；相較之下，其他模型例如我們的baseline model就會受制於其預先設定的詞彙庫。  
 而pointer-generator model的loss function公式與先前baseline model的公式相同，只是將機率分布 P(W) 的算法修改成本節所提及的公式。
 
 ### **3.3 Coverage mechanism**
+
 
 
 ## **9. Conclusion**
