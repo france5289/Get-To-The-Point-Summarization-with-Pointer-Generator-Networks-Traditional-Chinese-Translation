@@ -138,6 +138,25 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 
 ### **3.3 Coverage mechanism**
 
+重複產生語句是sequence-to-sequence model中常見的問題，尤其容易發生在產生多個句子組成的文本時。我們採用[Tu et al.(2016)][Modeling Coverage for Neural Machine Translation]所提出的 _coverage model_ 來解決此問題。  
+在我們的coverage model中，我們維護一個 _coverage vector_ ![c^t][c^t] 其為先前decoder步驟下所有attetion distribution的總和：  
+
+![equa10][equa10] (10)
+  
+直觀的來說，![c^t][c^t] 是對來源文件文字中的非常態分佈，其代表著那些目前已經被attetion機制接收的文字之覆蓋程度。注意，![c^0][c0] 是一個零向量，因為在第一個時間戳記時，沒有任合來源文件被覆蓋。
+coverage vector被當作attention機制的額外輸入，並將方程式(1)改寫為:
+  
+![equa11][equa11] (11)
+  
+其中![w_c][w_c] 是個可學習的向量且其與v等長。如此一來確保了attention機制目前的抉擇（選擇下一個要注意的詞彙在哪）是被其先前的抉擇（總結於![c^t][c^t]）所告知的。這樣應該使得attention機制更容易去避免重複注意同樣的位置，因此能避免產生重複的文字。  
+我們發現有必要去額外定義一個 _coverage loss_ 來懲罰重複注意相同的位置:  
+![equa12][equa12] (12)  
+  
+注意，coverage loss是有範圍的：![cov_bound][cov_bound]。  
+方程式(12)與Machine Translation中所有的coverage loss不同。
+在machine translation中，我們假設translation ratio應該趨近於1:1；於是最終coverage vector只會在大於或小於1時才會被懲罰。然而我們的loss function比較有彈性：因為summarization應該不需要常態覆蓋，我們只會在attetion distribution與coverage重疊時才會進行懲罰，用來避免repeated attetnion。最後，coverage loss會透過一些hyperparameter 
+![lambda][lambda] 來調整權重，並且將coverage loss加入主要的loss function來產生新的合成loss function:  
+![equa13][equa13](13)  
 
 
 ## **9. Conclusion**
@@ -182,3 +201,13 @@ _**Sequence to sequence**_ system前途光明，但仍然存在 _**不正確的�
 [equa9]:/figure/equa9.jpg
 [P_vocab_w]:/figure/P_vocab_w.jpg
 [Sigma_a_t]:/figure/Sigma_a_t.jpg
+[Modeling Coverage for Neural Machine Translation]:https://arxiv.org/pdf/1601.04811.pdf
+[c^t]:/figure/coverage_vector.jpg
+[equa10]:/figure/equa10.jpg
+[c0]:/figure/c0.jpg
+[equa11]:/figure/equa11.jpg
+[w_c]:/figure/w_c.jpg
+[equa12]:/figure/equa12.jpg
+[cov_bound]:/figure/cov_bound.jpg
+[lambda]:/figure/lambda.jpg
+[equa13]:/figure/equa13.jpg
